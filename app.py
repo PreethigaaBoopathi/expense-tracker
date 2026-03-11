@@ -1,46 +1,66 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+from datetime import date
 
 st.title("Smart Expense Tracker")
 
-amount = st.number_input("Enter Expense Amount")
-category = st.selectbox("Category", ["Food","Travel","Shopping","Bills","Other"])
-date = st.date_input("Select Date")
+# Initialize session state
+if "expenses" not in st.session_state:
+    st.session_state.expenses = []
 
+# Input section
+st.subheader("Add New Expense")
+
+amount = st.number_input("Enter Expense Amount", min_value=0.0, format="%.2f")
+
+category = st.selectbox(
+    "Category",
+    ["Food", "Transport", "Shopping", "Entertainment", "Other"]
+)
+
+expense_date = st.date_input("Select Date", date.today())
+
+# Add expense button
 if st.button("Add Expense"):
-    new_data = pd.DataFrame({
-        "Amount":[amount],
-        "Category":[category],
-        "Date":[date]
-    })
+    expense = {
+        "Amount": amount,
+        "Category": category,
+        "Date": expense_date
+    }
+    st.session_state.expenses.append(expense)
+    st.success("Expense added successfully!")
 
-    try:
-        df = pd.read_csv("expenses.csv")
-        df = pd.concat([df,new_data], ignore_index=True)
-    except:
-        df = new_data
+# Display expense data
+st.subheader("Expense Data")
 
-    df.to_csv("expenses.csv", index=False)
-    st.success("Expense Added")
+if st.session_state.expenses:
+    df = pd.DataFrame(st.session_state.expenses)
+    st.dataframe(df)
 
-try:
-    df = pd.read_csv("expenses.csv")
+    # Total expense
+    total = df["Amount"].sum()
+    st.subheader(f"Total Expense: ₹ {total}")
 
-    st.subheader("Expense Data")
-    st.write(df)
+    st.subheader("Delete Individual Expense")
 
-    st.subheader("Total Expense")
-    st.write(df["Amount"].sum())
+    # Delete option
+    delete_index = st.number_input(
+        "Enter row index to delete",
+        min_value=0,
+        max_value=len(df)-1,
+        step=1
+    )
 
-    st.subheader("Category Wise Spending")
+    if st.button("Delete Selected Expense"):
+        st.session_state.expenses.pop(delete_index)
+        st.success("Expense deleted!")
+        st.rerun()
 
-    category_sum = df.groupby("Category")["Amount"].sum()
+    # Clear all expenses
+    if st.button("Clear All Expenses"):
+        st.session_state.expenses = []
+        st.success("All expenses cleared!")
+        st.rerun()
 
-    fig, ax = plt.subplots()
-    ax.pie(category_sum, labels=category_sum.index, autopct="%1.1f%%")
-
-    st.pyplot(fig)
-
-except:
-    st.info("No data yet")
+else:
+    st.info("No expenses added yet.")
