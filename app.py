@@ -9,9 +9,7 @@ st.title("Smart Expense Tracker")
 if "expenses" not in st.session_state:
     st.session_state.expenses = []
 
-# ------------------------
 # Add Expense Section
-# ------------------------
 st.subheader("Add New Expense")
 
 amount = st.number_input("Enter Expense Amount", min_value=0.0, format="%.2f")
@@ -31,10 +29,8 @@ if st.button("Add Expense"):
     }
     st.session_state.expenses.append(expense)
     st.success("Expense added successfully!")
-
-# ------------------------
+    
 # Display Expense Data
-# ------------------------
 st.subheader("Expense Data")
 
 if st.session_state.expenses:
@@ -46,9 +42,7 @@ if st.session_state.expenses:
     total = df["Amount"].sum()
     st.subheader(f"Total Expense: ₹ {total}")
 
-    # ------------------------
     # Delete Expense
-    # ------------------------
     st.subheader("Delete Individual Expense")
 
     delete_index = st.number_input(
@@ -62,18 +56,14 @@ if st.session_state.expenses:
         st.session_state.expenses.pop(delete_index)
         st.success("Expense deleted!")
         st.rerun()
-
-    # ------------------------
+        
     # Clear All Expenses
-    # ------------------------
     if st.button("Clear All Expenses"):
         st.session_state.expenses = []
         st.success("All expenses cleared!")
         st.rerun()
-
-    # ------------------------
+        
     # Pie Chart
-    # ------------------------
     st.subheader("Expense Distribution (Pie Chart)")
 
     category_sum = df.groupby("Category")["Amount"].sum()
